@@ -11,7 +11,7 @@ class BooksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => BooksCubit(),
+      create: (context) => BooksCubit()..init(),
       child: BlocBuilder<BooksCubit, BookState>(
         builder:
             (context, state) => Container(

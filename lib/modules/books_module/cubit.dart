@@ -1,19 +1,26 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_kursach/api/books_api.dart';
+import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/models/book.dart';
 
 class BooksCubit extends Cubit<BookState> {
-  BooksCubit()
-    : super(
-        BookState(
-          books: [
-            Book(id: 1, title: 'Book 1', author: 'Author 1'),
-            Book(id: 2, title: 'Book 2', author: 'Author 2'),
-          ],
-        ),
-      );
+  BooksCubit() : super(BookState(books: []));
+
+  final _booksApi = GetItService().instance<BooksApi>();
+
+  void init() {
+    getBooks();
+  }
 
   void getBooks() {
-    state.books;
+    _booksApi.getBooks().then(
+      (books) {
+        emit(state.copyWith(books: books));
+      },
+      onError: (error) {
+        emit(state.copyWith(books: []));
+      },
+    );
   }
 
   void addBook() {
@@ -41,9 +48,7 @@ class BooksCubit extends Cubit<BookState> {
 
   void deleteBook(Book book) {
     emit(
-      state.copyWith(
-        books: state.books.where((b) => b.id != book.id).toList(),
-      ),
+      state.copyWith(books: state.books.where((b) => b.id != book.id).toList()),
     );
   }
 }
