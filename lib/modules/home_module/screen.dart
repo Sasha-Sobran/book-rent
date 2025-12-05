@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:library_kursach/modules/home_module/views/app_bar.dart';
+import 'package:library_kursach/modules/home_module/views/header.dart';
 
 class HomeScreen extends StatelessWidget {
   static const path = '/';
@@ -11,7 +12,15 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(preferredSize: const Size.fromHeight(kToolbarHeight), child: const CustomAppBar()),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight * 2),
+        child: Column(
+          children: [
+            const Header(),
+            const HomeAppBar(),
+          ],
+        ),
+      ),
       body: child,
     );
   }

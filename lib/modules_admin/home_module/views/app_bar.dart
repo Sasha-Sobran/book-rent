@@ -1,28 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:library_kursach/modules_admin/home_module/screen.dart';
-import 'package:library_kursach/modules/books_module/screen.dart';
-import 'package:library_kursach/modules/main_module/screen.dart';
-import 'package:library_kursach/modules/readers_module/screen.dart';
+import 'package:library_kursach/modules_admin/event_log_module/screen.dart';
+import 'package:library_kursach/modules_admin/users_users_module/screen.dart';
+import 'package:library_kursach/modules_admin/settings_module/screen.dart';
+import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
 
-class HomeAppBar extends StatelessWidget {
-  const HomeAppBar({super.key});
+class AdminAppBar extends StatelessWidget {
+  const AdminAppBar({super.key});
 
-  static final List<_HomeTab> _tabs = [
-    _HomeTab(
-      path: MainScreen.path,
-      label: 'Головна',
-      icon: Icons.home_outlined,
+  static const List<_AdminTab> _tabs = [
+    _AdminTab(
+      path: StatisticScreen.path,
+      label: 'Statistic',
+      icon: Icons.analytics,
     ),
-    _HomeTab(
-      path: BooksScreen.path,
-      label: 'Книги',
-      icon: Icons.menu_book_outlined,
+    _AdminTab(
+      path: ManageUsersScreen.path,
+      label: 'Manage Users',
+      icon: Icons.people,
     ),
-    _HomeTab(
-      path: ReadersScreen.path,
-      label: 'Користувачі',
-      icon: Icons.person_outline,
+    _AdminTab(path: EventLogScreen.path, label: 'Event Log', icon: Icons.event),
+    _AdminTab(
+      path: SettingsScreen.path,
+      label: 'Settings',
+      icon: Icons.settings,
     ),
   ];
 
@@ -71,8 +73,12 @@ class HomeAppBar extends StatelessWidget {
   }
 }
 
-class _HomeTab {
-  const _HomeTab({required this.path, required this.label, required this.icon});
+class _AdminTab {
+  const _AdminTab({
+    required this.path,
+    required this.label,
+    required this.icon,
+  });
 
   final String path;
   final String label;
