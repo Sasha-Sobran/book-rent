@@ -13,7 +13,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight * 2),
+        preferredSize: const Size.fromHeight(kToolbarHeight * 3),
         child: Column(
           children: [
             const Header(),

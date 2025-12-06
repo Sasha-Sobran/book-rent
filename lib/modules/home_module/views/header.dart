@@ -11,9 +11,6 @@ class Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appCubit = GetItService().instance<AppCubit>();
-    final isAdminOrRoot = appCubit.state.user?.isAdmin == true || appCubit.state.user?.isRoot == true;
-    print(isAdminOrRoot);
     return BlocProvider.value(
       value: GetItService().instance<AppCubit>(),
       child: BlocBuilder<AppCubit, AppState>(

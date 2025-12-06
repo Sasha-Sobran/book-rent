@@ -17,11 +17,4 @@ class UserApi {
       throw Exception(response.data['message'] ?? 'Get self failed');
     }
   }
-
-  Future<List<User>> getUsers() async {
-    final response = await dio.get('/admin/get-all-users/');
-    return (response.data as List<dynamic>)
-        .map((user) => User.fromJson(user))
-        .toList();
-  }
 }

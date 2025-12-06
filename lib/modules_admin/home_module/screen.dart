@@ -13,11 +13,12 @@ class AdminScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(kToolbarHeight * 2),
+        preferredSize: const Size.fromHeight(150),
         child: Column(
-          children: [
-            const AdminHeader(),
-            const AdminAppBar(),
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            AdminHeader(),
+            AdminAppBar(),
           ],
         ),
       ),

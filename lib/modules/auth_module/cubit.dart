@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:library_kursach/api/auth_api.dart';
-import 'package:library_kursach/api/common_api.dart';
 import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/models/user.dart';
@@ -12,7 +11,6 @@ import 'package:library_kursach/modules/books_module/screen.dart';
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit() : super(AuthState(roles: [], isSignUp: true));
 
-  final commonApi = CommonApi();
   final authApi = GetItService().instance<AuthApi>();
 
   final signInFormKey = GlobalKey<FormBuilderState>();

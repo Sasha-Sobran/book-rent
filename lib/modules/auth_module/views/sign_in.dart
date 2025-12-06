@@ -1,68 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:library_kursach/common_widgets/primary_text_builder_field.dart';
+import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/modules/auth_module/cubit.dart';
-import 'package:library_kursach/modules/auth_module/widgets/auth_button.dart';
 
 class SignInView extends StatelessWidget {
-  static const path = '/sign-in';
-
   const SignInView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final authCubit = context.read<AuthCubit>();
+    final cubit = context.read<AuthCubit>();
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.35,
-      width: MediaQuery.of(context).size.width * 0.3,
-      padding: const EdgeInsets.all(20),
+      width: 400,
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Column(
-            children: [
-              Text(
-                'Login',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              Text('Fill in the form to login'),
-            ],
-          ),
+          Text('Вхід', style: AppTextStyles.h2),
+          const SizedBox(height: 8),
+          Text('Введіть дані для входу', style: AppTextStyles.bodySmall),
+          const SizedBox(height: 32),
           FormBuilder(
-            key: authCubit.signInFormKey,
-            initialValue: {'email': '', 'password': ''},
+            key: cubit.signInFormKey,
             child: Column(
-              spacing: 10,
               children: [
-                PrimaryTextBuilderField(name: 'email', labelText: 'Enter your email'),
-                PrimaryTextBuilderField(
+                FormBuilderTextField(
+                  name: 'email',
+                  decoration: AppDecorations.inputWithIcon(
+                    Icons.email_outlined,
+                    'Email',
+                  ),
+                ),
+                const SizedBox(height: 16),
+                FormBuilderTextField(
                   name: 'password',
-                  labelText: 'Enter your password',
+                  obscureText: true,
+                  decoration: AppDecorations.inputWithIcon(
+                    Icons.lock_outline,
+                    'Пароль',
+                  ),
                 ),
               ],
             ),
           ),
-          Column(
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => cubit.signIn(context),
+              style: AppButtons.primary(),
+              child: const Text('Увійти'),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AuthButton(
-                text: 'Login',
-                onPressed: () => context.read<AuthCubit>().signIn(context),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Don\'t have an account?'),
-                  TextButton(
-                    onPressed: () => context.read<AuthCubit>().toggleSignUp(),
-                    child: const Text('Register'),
-                  ),
-                ],
+              Text('Немає акаунту?', style: AppTextStyles.bodySmall),
+              TextButton(
+                onPressed: () => cubit.toggleSignUp(),
+                style: AppButtons.text(),
+                child: const Text('Зареєструватись'),
               ),
             ],
           ),
