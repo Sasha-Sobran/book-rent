@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/core/theme/theme.dart';
+import 'package:library_kursach/utils/permission_utils.dart';
+import 'package:library_kursach/common_widgets/confirmation_dialog.dart';
 import 'package:library_kursach/models/user.dart';
 import 'package:library_kursach/modules_admin/users_users_module/cubit.dart';
 import 'package:library_kursach/modules_admin/users_users_module/views/user_edit_modal.dart';
@@ -27,15 +29,15 @@ class UserItem extends StatelessWidget {
     final cubit = context.read<UsersUsersCubit>();
     final appCubit = GetItService().instance<AppCubit>();
     final roleColor = AppColors.roleColor(user.role);
-    final canEdit = appCubit.state.user?.isRoot == true || (appCubit.state.user?.isAdmin == true && user.role != 'root');
-    final canDelete = user.role != 'root';
+    final canEdit = PermissionUtils.canEditUser(appCubit.state.user, user);
+    final canDelete = PermissionUtils.canDeleteUser(user);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.5)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -49,7 +51,7 @@ class UserItem extends StatelessWidget {
                 Container(
                   width: 48,
                   height: 48,
-                  decoration: BoxDecoration(color: roleColor.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: roleColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(12)),
                   child: Icon(_getIconForRole(user.role), color: roleColor, size: 24),
                 ),
                 const SizedBox(width: 16),
@@ -63,7 +65,7 @@ class UserItem extends StatelessWidget {
                           const SizedBox(width: 10),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(color: roleColor.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            decoration: BoxDecoration(color: roleColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                             child: Text(user.role, style: TextStyle(color: roleColor, fontSize: 11, fontWeight: FontWeight.w600)),
                           ),
                         ],
@@ -108,22 +110,17 @@ class UserItem extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, UsersUsersCubit cubit) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Видалити користувача?'),
-        content: Text('Ви впевнені, що хочете видалити ${user.name} ${user.surname}?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(ctx).pop(), child: const Text('Скасувати')),
-          ElevatedButton(
-            onPressed: () { Navigator.of(ctx).pop(); cubit.deleteUser(context, user.id!); },
-            style: AppButtons.danger,
-            child: const Text('Видалити'),
-          ),
-        ],
-      ),
-    );
+    ConfirmationDialog.show(
+      context,
+      title: 'Видалити користувача?',
+      message: 'Ви впевнені, що хочете видалити ${user.name} ${user.surname}?',
+      confirmText: 'Видалити',
+      confirmColor: AppColors.error,
+    ).then((confirmed) {
+      if (confirmed == true) {
+        cubit.deleteUser(context, user.id!);
+      }
+    });
   }
 }
 
@@ -137,7 +134,7 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.1),
+      color: color.withValues(alpha: 0.1),
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,

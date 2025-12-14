@@ -6,6 +6,9 @@ import 'package:library_kursach/modules/books_module/screen.dart';
 import 'package:library_kursach/modules/home_module/screen.dart';
 import 'package:library_kursach/modules/main_module/screen.dart';
 import 'package:library_kursach/modules/readers_module/screen.dart';
+import 'package:library_kursach/modules/profile_module/screen.dart';
+import 'package:library_kursach/modules/rents_module/screen.dart';
+import 'package:library_kursach/modules/my_rents_module/screen.dart';
 import 'package:library_kursach/modules_admin/event_log_module/screen.dart';
 import 'package:library_kursach/modules_admin/users_users_module/screen.dart';
 import 'package:library_kursach/modules_admin/settings_module/screen.dart';
@@ -53,10 +56,34 @@ class AppRoutes {
   );
 
   late final readersRoute = GoRoute(
-    path: ReadersScreen.path,
+    path: ReadersModuleScreen.path,
     parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
-      return MaterialPage(child: const ReadersScreen());
+      return MaterialPage(child: const ReadersModuleScreen());
+    },
+  );
+
+  late final profileRoute = GoRoute(
+    path: ProfileScreen.path,
+    parentNavigatorKey: homeNavigatorKey,
+    pageBuilder: (context, state) {
+      return MaterialPage(child: const ProfileScreen());
+    },
+  );
+
+  late final rentsRoute = GoRoute(
+    path: RentsScreen.path,
+    parentNavigatorKey: homeNavigatorKey,
+    pageBuilder: (context, state) {
+      return MaterialPage(child: const RentsScreen());
+    },
+  );
+
+  late final myRentsRoute = GoRoute(
+    path: MyRentsScreen.path,
+    parentNavigatorKey: homeNavigatorKey,
+    pageBuilder: (context, state) {
+      return MaterialPage(child: const MyRentsScreen());
     },
   );
 
@@ -100,7 +127,7 @@ class AppRoutes {
     },
   );
 
-  List<RouteBase> getHomeRoutes() => [mainRoute, booksRoute, readersRoute];
+  List<RouteBase> getHomeRoutes() => [mainRoute, booksRoute, readersRoute, rentsRoute, myRentsRoute, profileRoute];
 
   List<RouteBase> getRouteTree() => [
     homeShellRoute,

@@ -33,13 +33,14 @@ class AdminAppBar extends StatelessWidget {
         border: Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: _tabs.asMap().entries.map((entry) {
           final index = entry.key;
           final tab = entry.value;
           final isSelected = selectedIndex == index;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(left: 8),
             child: Material(
               color: isSelected ? AppColors.primary : Colors.transparent,
               borderRadius: BorderRadius.circular(10),
@@ -47,11 +48,11 @@ class AdminAppBar extends StatelessWidget {
                 onTap: () => context.go(tab.path),
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   child: Row(
                     children: [
                       Icon(tab.icon, size: 20, color: isSelected ? Colors.white : AppColors.textSecondary),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Text(
                         tab.label,
                         style: TextStyle(

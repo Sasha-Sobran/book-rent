@@ -31,7 +31,7 @@ class AppCubit extends HydratedCubit<AppState> {
   }
 
   Future<void> getSelf() async {
-    final user = await UserApi().getSelf(state.token ?? '');
+    final user = await UserApi().getSelf();
     emit(state.copyWith(user: user));
   }
 

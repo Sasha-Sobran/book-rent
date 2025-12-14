@@ -1,21 +1,30 @@
 import 'package:dio/dio.dart' show DioError;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_kursach/api/cities_api.dart';
+import 'package:library_kursach/api/libraries_api.dart';
 import 'package:library_kursach/api/settings_api.dart';
 import 'package:library_kursach/common_widgets/app_snackbar.dart';
 import 'package:library_kursach/core/get_it.dart';
+import 'package:library_kursach/models/library.dart';
 import 'package:library_kursach/models/settings.dart';
 
 class SettingsCubit extends Cubit<SettingsState> {
   SettingsCubit() : super(SettingsState());
 
   final api = GetItService().instance<SettingsApi>();
+  final librariesApi = GetItService().instance<LibrariesApi>();
+  final citiesApi = GetItService().instance<CitiesApi>();
 
-  void init() {
+  void init({bool isRoot = false}) {
     loadGenres();
     loadCategories();
     loadReaderCategories();
     loadPenaltyTypes();
+    if (isRoot) {
+      loadCities();
+      loadLibraries();
+    }
   }
 
   Future<void> loadGenres() async {
@@ -36,6 +45,21 @@ class SettingsCubit extends Cubit<SettingsState> {
   Future<void> loadPenaltyTypes() async {
     final types = await api.getPenaltyTypes();
     emit(state.copyWith(penaltyTypes: types));
+  }
+
+  Future<void> loadCities() async {
+    final cities = await citiesApi.getCities();
+    emit(state.copyWith(cities: cities));
+  }
+
+  Future<void> loadLibraries() async {
+    emit(state.copyWith(isLoadingLibraries: true));
+    try {
+      final libraries = await librariesApi.getLibraries();
+      emit(state.copyWith(libraries: libraries, isLoadingLibraries: false));
+    } catch (e) {
+      emit(state.copyWith(isLoadingLibraries: false));
+    }
   }
 
   Future<void> createGenre(BuildContext context, String name) async {
@@ -108,6 +132,37 @@ class SettingsCubit extends Cubit<SettingsState> {
     }
   }
 
+  Future<void> createCity(BuildContext context, String name) async {
+    try {
+      await citiesApi.createCity(name);
+      await loadCities();
+      if (context.mounted) AppSnackbar.success(context, 'Місто створено');
+    } on DioError catch (e) {
+      if (context.mounted) AppSnackbar.error(context, e.response?.data?['detail'] ?? 'Помилка');
+    }
+  }
+
+  Future<void> createLibrary(
+    BuildContext context, {
+    required String name,
+    required int cityId,
+    required String address,
+    required String phone,
+  }) async {
+    try {
+      await librariesApi.createLibrary(
+        name: name,
+        cityId: cityId,
+        address: address,
+        phoneNumber: phone,
+      );
+      await loadLibraries();
+      if (context.mounted) AppSnackbar.success(context, 'Бібліотеку створено');
+    } on DioError catch (e) {
+      if (context.mounted) AppSnackbar.error(context, e.response?.data?['detail'] ?? 'Помилка');
+    }
+  }
+
   Future<void> createPenaltyType(BuildContext context, String name) async {
     try {
       await api.createPenaltyType(name);
@@ -134,12 +189,18 @@ class SettingsState {
   final List<Category> categories;
   final List<ReaderCategory> readerCategories;
   final List<PenaltyType> penaltyTypes;
+  final List<City> cities;
+  final List<Library> libraries;
+  final bool isLoadingLibraries;
 
   SettingsState({
     this.genres = const [],
     this.categories = const [],
     this.readerCategories = const [],
     this.penaltyTypes = const [],
+    this.cities = const [],
+    this.libraries = const [],
+    this.isLoadingLibraries = false,
   });
 
   SettingsState copyWith({
@@ -147,12 +208,18 @@ class SettingsState {
     List<Category>? categories,
     List<ReaderCategory>? readerCategories,
     List<PenaltyType>? penaltyTypes,
+    List<City>? cities,
+    List<Library>? libraries,
+    bool? isLoadingLibraries,
   }) {
     return SettingsState(
       genres: genres ?? this.genres,
       categories: categories ?? this.categories,
       readerCategories: readerCategories ?? this.readerCategories,
       penaltyTypes: penaltyTypes ?? this.penaltyTypes,
+      cities: cities ?? this.cities,
+      libraries: libraries ?? this.libraries,
+      isLoadingLibraries: isLoadingLibraries ?? this.isLoadingLibraries,
     );
   }
 }

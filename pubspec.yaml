@@ -18,6 +18,9 @@ dependencies:
   get_it: ^9.1.0
   flutter_form_builder: ^10.0.1
   path_provider: ^2.1.5
+  intl: ^0.20.2
+  image_picker: ^1.1.2
+  web_socket_channel: ^3.0.1
 
 dev_dependencies:
   flutter_test:

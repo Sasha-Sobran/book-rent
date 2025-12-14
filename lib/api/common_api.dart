@@ -15,4 +15,9 @@ class CommonApi {
     final response = await dio.get('/categories/');
     return (response.data as List).map((e) => Category.fromJson(e)).toList();
   }
+
+  Future<List<ReaderCategory>> getReaderCategories() async {
+    final response = await dio.get('/reader-categories/');
+    return (response.data as List).map((e) => ReaderCategory.fromJson(e)).toList();
+  }
 }

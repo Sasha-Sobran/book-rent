@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "debug",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "args": ["--debug"]
+        },
+        {
+            "name": "release",
+            "type": "dart",
+            "request": "launch",
+            "program": "lib/main.dart",
+            "args": ["--release"]
+
+        }
+    ]
+}

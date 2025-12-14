@@ -37,12 +37,12 @@ class RoleItem extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               width: 90,
               decoration: BoxDecoration(
-                color: isSelected ? roleColor.withOpacity(0.15) : AppColors.surface,
+                color: isSelected ? roleColor.withValues(alpha: 0.15) : AppColors.surface,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: isSelected ? roleColor : AppColors.border, width: isSelected ? 2 : 1),
                 boxShadow: isSelected
-                    ? [BoxShadow(color: roleColor.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 2))]
-                    : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 4, offset: const Offset(0, 2))],
+                    ? [BoxShadow(color: roleColor.withValues(alpha: 0.3), blurRadius: 8, offset: const Offset(0, 2))]
+                    : [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 4, offset: const Offset(0, 2))],
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Column(
@@ -50,7 +50,7 @@ class RoleItem extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(color: roleColor.withOpacity(isSelected ? 0.2 : 0.1), borderRadius: BorderRadius.circular(10)),
+                    decoration: BoxDecoration(color: roleColor.withValues(alpha: isSelected ? 0.2 : 0.1), borderRadius: BorderRadius.circular(10)),
                     child: Icon(roleIcon, color: roleColor, size: 22),
                   ),
                   const SizedBox(height: 8),

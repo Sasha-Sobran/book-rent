@@ -31,6 +31,27 @@ class AdminApi {
     );
   }
 
+  Future<void> createLibrarian({
+    required String email,
+    required String password,
+    required String name,
+    required String surname,
+    String? phoneNumber,
+    required int libraryId,
+  }) async {
+    await dio.post(
+      '/admin/create-librarian/',
+      data: {
+        'email': email,
+        'password': password,
+        'name': name,
+        'surname': surname,
+        'phone_number': phoneNumber,
+        'library_id': libraryId,
+      },
+    );
+  }
+
   Future<void> editUser(
     int userId,
     String email,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/core/theme/theme.dart';
+import 'package:library_kursach/common_widgets/confirmation_dialog.dart';
 import 'package:library_kursach/models/settings.dart';
 import 'package:library_kursach/modules_admin/settings_module/cubit.dart';
 import 'package:library_kursach/modules_admin/settings_module/widgets/settings_card.dart';
@@ -25,7 +26,7 @@ class ReaderCategoriesSection extends StatelessWidget {
                 children: state.readerCategories.map((cat) => ReaderCategoryItem(
                   category: cat,
                   onEdit: () => _showCategoryDialog(context, cubit, category: cat),
-                  onDelete: () => cubit.deleteReaderCategory(context, cat.id),
+                  onDelete: () => _confirmDelete(context, 'категорію читачів "${cat.name}"', () => cubit.deleteReaderCategory(context, cat.id)),
                 )).toList(),
               ),
       ),
@@ -77,6 +78,20 @@ class ReaderCategoriesSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _confirmDelete(BuildContext context, String itemLabel, VoidCallback onConfirm) {
+    ConfirmationDialog.show(
+      context,
+      title: 'Підтвердьте видалення',
+      message: 'Видалити $itemLabel?',
+      confirmText: 'Видалити',
+      confirmColor: AppColors.error,
+    ).then((confirmed) {
+      if (confirmed == true) {
+        onConfirm();
+      }
+    });
   }
 }
 

@@ -2,10 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:library_kursach/core/theme/theme.dart';
+import 'package:library_kursach/models/user.dart';
 import 'package:library_kursach/modules_admin/users_users_module/cubit.dart';
+import 'package:library_kursach/modules_admin/users_users_module/widgets/role_dropdown.dart';
+import 'package:library_kursach/modules_admin/users_users_module/widgets/library_dropdown.dart';
 
-class UserCreateModal extends StatelessWidget {
+class UserCreateModal extends StatefulWidget {
   const UserCreateModal({super.key});
+
+  @override
+  State<UserCreateModal> createState() => _UserCreateModalState();
+}
+
+class _UserCreateModalState extends State<UserCreateModal> {
+  int? _selectedRoleId;
+
+  bool get _isLibrarianSelected {
+    final cubit = context.read<UsersUsersCubit>();
+    final role = cubit.state.roles.firstWhere(
+      (r) => r.id == _selectedRoleId,
+      orElse: () => Role(id: -1, name: ''),
+    );
+    return role.name.toLowerCase() == 'librarian';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +34,7 @@ class UserCreateModal extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Container(
         width: 420,
-        constraints: const BoxConstraints(maxHeight: 600),
+        constraints: const BoxConstraints(maxHeight: 650),
         decoration: AppDecorations.modalDecoration,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -27,7 +46,7 @@ class UserCreateModal extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.person_add, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 16),
@@ -52,8 +71,12 @@ class UserCreateModal extends StatelessWidget {
                   key: cubit.userCreateFormKey,
                   child: Column(
                     children: [
-                      _buildDropdown(cubit),
+                      RoleDropdown(
+                        onChanged: (v) => setState(() => _selectedRoleId = v),
+                      ),
                       const SizedBox(height: 16),
+                      if (_isLibrarianSelected) const LibraryDropdown(),
+                      if (_isLibrarianSelected) const SizedBox(height: 16),
                       FormBuilderTextField(name: 'name', decoration: AppDecorations.inputWithIcon(Icons.person_outline, 'Імʼя')),
                       const SizedBox(height: 16),
                       FormBuilderTextField(name: 'surname', decoration: AppDecorations.inputWithIcon(Icons.person_outline, 'Прізвище')),
@@ -91,14 +114,6 @@ class UserCreateModal extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDropdown(UsersUsersCubit cubit) {
-    return FormBuilderDropdown(
-      name: 'role_id',
-      decoration: AppDecorations.inputWithIcon(Icons.badge_outlined, 'Роль'),
-      items: cubit.state.roles.map((role) => DropdownMenuItem(value: role.id, child: Text(role.name))).toList(),
     );
   }
 }

@@ -2,22 +2,48 @@ import 'package:dio/dio.dart' show DioError;
 import 'package:flutter/material.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/api/admin_api.dart';
+import 'package:library_kursach/api/libraries_api.dart';
 import 'package:library_kursach/common_widgets/app_snackbar.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/models/user.dart';
+import 'package:library_kursach/models/library.dart';
 
 class UsersUsersCubit extends Cubit<UsersUsersState> {
-  UsersUsersCubit() : super(UsersUsersState(roles: [], users: []));
+  UsersUsersCubit() : super(UsersUsersState(roles: [], users: [], libraries: []));
 
   final adminApi = GetItService().instance<AdminApi>();
+  final librariesApi = GetItService().instance<LibrariesApi>();
+  final appCubit = GetItService().instance<AppCubit>();
   final userCreateFormKey = GlobalKey<FormBuilderState>();
   final userEditFormKey = GlobalKey<FormBuilderState>();
   final searchController = TextEditingController();
 
+  String get _currentUserRole => appCubit.state.user?.role.toLowerCase() ?? '';
+
+  List<String> get _assignableRoleNames {
+    switch (_currentUserRole) {
+      case 'root':
+        return ['admin', 'librarian'];
+      case 'admin':
+        return ['librarian'];
+      default:
+        return [];
+    }
+  }
+
+  List<Role> get assignableRoles {
+    final allowedNames = _assignableRoleNames;
+    return state.roles.where((role) => allowedNames.contains(role.name.toLowerCase())).toList();
+  }
+
+  bool canAssignRole(Role role) => _assignableRoleNames.contains(role.name.toLowerCase());
+
   void init() {
     getRoles();
     getUsers();
+    loadLibraries();
   }
 
   Future<void> getRoles() async {
@@ -54,14 +80,53 @@ class UsersUsersCubit extends Cubit<UsersUsersState> {
     await getUsers();
   }
 
+  Future<void> loadLibraries() async {
+    final libs = await librariesApi.getLibraries();
+    emit(state.copyWith(libraries: libs));
+  }
+
   Future<void> createUser(BuildContext context) async {
     if (userCreateFormKey.currentState?.validate() != true) return;
     userCreateFormKey.currentState?.save();
     final v = userCreateFormKey.currentState!.value;
+    final roleId = v['role_id'] as int?;
+    final role = state.roles.firstWhere(
+      (r) => r.id == roleId,
+      orElse: () => Role(id: roleId ?? -1, name: ''),
+    );
+
+    if (roleId == null || role.id == -1) {
+      emit(state.copyWith(isSubmitting: false));
+      if (context.mounted) AppSnackbar.error(context, 'Оберіть роль');
+      return;
+    }
+
+    if (!canAssignRole(role)) {
+      emit(state.copyWith(isSubmitting: false));
+      if (context.mounted) AppSnackbar.error(context, 'У вас немає прав створювати користувачів з цією роллю');
+      return;
+    }
 
     emit(state.copyWith(isSubmitting: true));
     try {
-      await adminApi.createUser(v['email'], v['password'], v['role_id'], v['name'], v['surname'], v['phone_number']);
+      if (role.name.toLowerCase() == 'librarian') {
+        final libraryId = v['library_id'] as int?;
+        if (libraryId == null) {
+          emit(state.copyWith(isSubmitting: false));
+          if (context.mounted) AppSnackbar.error(context, 'Оберіть бібліотеку');
+          return;
+        }
+        await adminApi.createLibrarian(
+          email: v['email'],
+          password: v['password'],
+          name: v['name'],
+          surname: v['surname'],
+          phoneNumber: v['phone_number'],
+          libraryId: libraryId,
+        );
+      } else {
+        await adminApi.createUser(v['email'], v['password'], v['role_id'], v['name'], v['surname'], v['phone_number']);
+      }
       await getUsers();
       emit(state.copyWith(isSubmitting: false));
       if (context.mounted) {
@@ -78,10 +143,27 @@ class UsersUsersCubit extends Cubit<UsersUsersState> {
     if (userEditFormKey.currentState?.validate() != true) return;
     userEditFormKey.currentState?.save();
     final v = userEditFormKey.currentState!.value;
+    final roleId = v['role_id'] as int?;
+    final role = state.roles.firstWhere(
+      (r) => r.id == roleId,
+      orElse: () => Role(id: roleId ?? -1, name: ''),
+    );
+
+    if (roleId == null || role.id == -1) {
+      emit(state.copyWith(isSubmitting: false));
+      if (context.mounted) AppSnackbar.error(context, 'Оберіть роль');
+      return;
+    }
+
+    if (!canAssignRole(role)) {
+      emit(state.copyWith(isSubmitting: false));
+      if (context.mounted) AppSnackbar.error(context, 'Ви не можете призначати цю роль');
+      return;
+    }
 
     emit(state.copyWith(isSubmitting: true));
     try {
-      await adminApi.editUser(userId, v['email'], v['password'], v['role_id'], v['name'], v['surname'], v['phone_number']);
+      await adminApi.editUser(userId, v['email'], v['password'], roleId, v['name'], v['surname'], v['phone_number']);
       await getUsers();
       emit(state.copyWith(isSubmitting: false));
       if (context.mounted) {
@@ -118,6 +200,7 @@ class UsersUsersState {
   final String searchQuery;
   final bool isLoading;
   final bool isSubmitting;
+  final List<Library> libraries;
 
   UsersUsersState({
     required this.roles,
@@ -126,6 +209,7 @@ class UsersUsersState {
     this.searchQuery = '',
     this.isLoading = false,
     this.isSubmitting = false,
+    this.libraries = const [],
   });
 
   bool get isFiltered => selectedRoleId != null || searchQuery.isNotEmpty;
@@ -138,6 +222,7 @@ class UsersUsersState {
     bool clearRoleId = false,
     bool? isLoading,
     bool? isSubmitting,
+    List<Library>? libraries,
   }) {
     return UsersUsersState(
       roles: roles ?? this.roles,
@@ -146,6 +231,7 @@ class UsersUsersState {
       searchQuery: searchQuery ?? this.searchQuery,
       isLoading: isLoading ?? this.isLoading,
       isSubmitting: isSubmitting ?? this.isSubmitting,
+      libraries: libraries ?? this.libraries,
     );
   }
 }

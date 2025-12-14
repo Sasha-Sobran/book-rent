@@ -4,6 +4,7 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/models/user.dart';
 import 'package:library_kursach/modules_admin/users_users_module/cubit.dart';
+import 'package:library_kursach/modules_admin/users_users_module/widgets/user_role_dropdown.dart';
 
 class UserEditModal extends StatelessWidget {
   final User user;
@@ -31,7 +32,7 @@ class UserEditModal extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
                     child: const Icon(Icons.edit, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 16),
@@ -57,7 +58,7 @@ class UserEditModal extends StatelessWidget {
                   initialValue: {'role_id': currentRoleId, 'name': user.name, 'surname': user.surname, 'email': user.email, 'phone_number': user.phoneNumber ?? '', 'password': ''},
                   child: Column(
                     children: [
-                      _buildDropdown(cubit),
+                      UserRoleDropdown(currentRoleId: currentRoleId),
                       const SizedBox(height: 16),
                       FormBuilderTextField(name: 'name', decoration: AppDecorations.inputWithIcon(Icons.person_outline, 'Імʼя')),
                       const SizedBox(height: 16),
@@ -96,14 +97,6 @@ class UserEditModal extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDropdown(UsersUsersCubit cubit) {
-    return FormBuilderDropdown(
-      name: 'role_id',
-      decoration: AppDecorations.inputWithIcon(Icons.badge_outlined, 'Роль'),
-      items: cubit.state.roles.map((role) => DropdownMenuItem(value: role.id, child: Text(role.name))).toList(),
     );
   }
 }

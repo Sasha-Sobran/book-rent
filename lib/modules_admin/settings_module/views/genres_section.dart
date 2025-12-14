@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:library_kursach/core/theme/theme.dart';
+import 'package:library_kursach/common_widgets/confirmation_dialog.dart';
 import 'package:library_kursach/modules_admin/settings_module/cubit.dart';
 import 'package:library_kursach/modules_admin/settings_module/widgets/settings_card.dart';
 import 'package:library_kursach/modules_admin/settings_module/widgets/settings_chip.dart';
@@ -20,13 +22,31 @@ class GenresSection extends StatelessWidget {
         child: Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: state.genres.map((genre) => SettingsChip(
-            label: genre.name,
-            onDelete: () => cubit.deleteGenre(context, genre.id),
-          )).toList(),
+          children: state.genres
+              .map(
+                (genre) => SettingsChip(
+                  label: genre.name,
+                  onDelete: () => _confirmDelete(context, 'жанр "${genre.name}"', () => cubit.deleteGenre(context, genre.id)),
+                ),
+              )
+              .toList(),
         ),
       ),
     );
+  }
+
+  void _confirmDelete(BuildContext context, String itemLabel, VoidCallback onConfirm) {
+    ConfirmationDialog.show(
+      context,
+      title: 'Підтвердьте видалення',
+      message: 'Видалити $itemLabel?',
+      confirmText: 'Видалити',
+      confirmColor: AppColors.error,
+    ).then((confirmed) {
+      if (confirmed == true) {
+        onConfirm();
+      }
+    });
   }
 }
 

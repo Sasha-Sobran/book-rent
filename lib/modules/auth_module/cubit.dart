@@ -1,8 +1,10 @@
+import 'package:dio/dio.dart' show DioError;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:go_router/go_router.dart';
 import 'package:library_kursach/api/auth_api.dart';
+import 'package:library_kursach/common_widgets/app_snackbar.dart';
 import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/models/user.dart';
@@ -21,19 +23,35 @@ class AuthCubit extends Cubit<AuthState> {
       return;
     }
     signUpFormKey.currentState?.save();
-    final tokens = await authApi.signUp({
-      'name': signUpFormKey.currentState?.value['name'],
-      'email': signUpFormKey.currentState?.value['email'],
-      'password': signUpFormKey.currentState?.value['password'],
-    });
+    final values = signUpFormKey.currentState!.value;
+    if (values['password'] != values['confirm_password']) {
+      AppSnackbar.error(context, 'Паролі не співпадають');
+      return;
+    }
 
-    if (tokens != null) {
-      await GetItService().instance<AppCubit>().login(
-        tokens['access_token']!,
-        tokens['refresh_token']!,
-      );
+    try {
+      final tokens = await authApi.signUp({
+        'name': values['name'],
+        'surname': values['surname'],
+        'email': values['email'],
+        'password': values['password'],
+      });
+
+      if (tokens != null) {
+        await GetItService().instance<AppCubit>().login(
+          tokens['access_token']!,
+          tokens['refresh_token']!,
+        );
+        if (context.mounted) {
+          context.go(BooksScreen.path);
+        }
+      }
+    } on DioError catch (e) {
+      final detail = e.response?.data?['detail'] ?? 'Помилка реєстрації';
+      if (context.mounted) AppSnackbar.error(context, detail);
+    } catch (_) {
       if (context.mounted) {
-        context.go(BooksScreen.path);
+        AppSnackbar.error(context, 'Помилка реєстрації');
       }
     }
   }
@@ -43,18 +61,29 @@ class AuthCubit extends Cubit<AuthState> {
       return;
     }
     signInFormKey.currentState?.save();
-    final tokens = await authApi.signIn({
-      'email': signInFormKey.currentState?.value['email'],
-      'password': signInFormKey.currentState?.value['password'],
-    });
+    final values = signInFormKey.currentState!.value;
 
-    if (tokens != null) {
-      await GetItService().instance<AppCubit>().login(
-        tokens['access_token']!,
-        tokens['refresh_token']!,
-      );
+    try {
+      final tokens = await authApi.signIn({
+        'email': values['email'],
+        'password': values['password'],
+      });
+
+      if (tokens != null) {
+        await GetItService().instance<AppCubit>().login(
+          tokens['access_token']!,
+          tokens['refresh_token']!,
+        );
+        if (context.mounted) {
+          context.go(BooksScreen.path);
+        }
+      }
+    } on DioError catch (e) {
+      final detail = e.response?.data?['detail'] ?? 'Невірний email або пароль';
+      if (context.mounted) AppSnackbar.error(context, detail);
+    } catch (_) {
       if (context.mounted) {
-        context.go(BooksScreen.path);
+        AppSnackbar.error(context, 'Помилка входу');
       }
     }
   }

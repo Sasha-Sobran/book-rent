@@ -33,12 +33,12 @@ class AuthScreen extends StatelessWidget {
                 Positioned(
                   top: -100,
                   right: -100,
-                  child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1))),
+                  child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.1))),
                 ),
                 Positioned(
                   bottom: -50,
                   left: -50,
-                  child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1))),
+                  child: Container(width: 200, height: 200, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.1))),
                 ),
                 Center(
                   child: SingleChildScrollView(
@@ -47,13 +47,13 @@ class AuthScreen extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(20)),
                           child: const Icon(Icons.local_library, size: 60, color: Colors.white),
                         ),
                         const SizedBox(height: 24),
                         const Text('Library App', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.5)),
                         const SizedBox(height: 8),
-                        Text('Ваша бібліотека в одному місці', style: TextStyle(fontSize: 14, color: Colors.white.withOpacity(0.8))),
+                        Text('Ваша бібліотека в одному місці', style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8))),
                         const SizedBox(height: 48),
                         BlocBuilder<AuthCubit, AuthState>(
                           builder: (context, state) => AnimatedSwitcher(
