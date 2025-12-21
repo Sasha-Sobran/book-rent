@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
+import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/modules_admin/event_log_module/screen.dart';
 import 'package:library_kursach/modules_admin/users_users_module/screen.dart';
@@ -9,22 +11,33 @@ import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
 class AdminAppBar extends StatelessWidget {
   const AdminAppBar({super.key});
 
-  static const List<_AdminTab> _tabs = [
-    _AdminTab(path: StatisticScreen.path, label: 'Статистика', icon: Icons.analytics_outlined),
-    _AdminTab(path: ManageUsersScreen.path, label: 'Користувачі', icon: Icons.people_outline),
-    _AdminTab(path: EventLogScreen.path, label: 'Журнал подій', icon: Icons.history),
-    _AdminTab(path: SettingsScreen.path, label: 'Налаштування', icon: Icons.settings_outlined),
-  ];
+  List<_AdminTab> _getTabs() {
+    final appCubit = GetItService().instance<AppCubit>();
+    final isRoot = appCubit.state.user?.isRoot == true;
+    
+    final tabs = <_AdminTab>[
+      _AdminTab(path: ManageUsersScreen.path, label: 'Користувачі', icon: Icons.people_outline),
+      _AdminTab(path: EventLogScreen.path, label: 'Журнал подій', icon: Icons.history),
+    ];
+    
+    if (isRoot) {
+      tabs.insert(0, _AdminTab(path: StatisticScreen.path, label: 'Статистика', icon: Icons.analytics_outlined));
+      tabs.add(_AdminTab(path: SettingsScreen.path, label: 'Налаштування', icon: Icons.settings_outlined));
+    }
+    
+    return tabs;
+  }
 
-  int _currentIndex(BuildContext context) {
+  int _currentIndex(BuildContext context, List<_AdminTab> tabs) {
     final location = GoRouterState.of(context).matchedLocation;
-    final index = _tabs.indexWhere((tab) => location == tab.path);
+    final index = tabs.indexWhere((tab) => location == tab.path);
     return index == -1 ? 0 : index;
   }
 
   @override
   Widget build(BuildContext context) {
-    final selectedIndex = _currentIndex(context);
+    final tabs = _getTabs();
+    final selectedIndex = _currentIndex(context, tabs);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
@@ -34,7 +47,7 @@ class AdminAppBar extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
-        children: _tabs.asMap().entries.map((entry) {
+        children: tabs.asMap().entries.map((entry) {
           final index = entry.key;
           final tab = entry.value;
           final isSelected = selectedIndex == index;

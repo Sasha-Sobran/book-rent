@@ -6,7 +6,6 @@ import 'package:library_kursach/common_cubit/app_cubit/state.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/modules/profile_module/screen.dart';
-import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
 import 'package:library_kursach/modules/notifications_module/widgets/notifications_button.dart';
 
 class Header extends StatelessWidget {
@@ -19,7 +18,6 @@ class Header extends StatelessWidget {
       child: BlocBuilder<AppCubit, AppState>(
         builder: (context, state) {
           final user = state.user;
-          final isAdmin = user?.isAdmin == true || user?.isRoot == true;
 
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -40,14 +38,6 @@ class Header extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text('Library', style: AppTextStyles.h4),
                 const Spacer(),
-                if (isAdmin)
-                  TextButton.icon(
-                    onPressed: () => context.go(StatisticScreen.path),
-                    icon: const Icon(Icons.analytics_outlined, size: 18),
-                    label: const Text('Адмін панель'),
-                    style: AppButtons.text(color: AppColors.textSecondary),
-                  ),
-                const SizedBox(width: 12),
                 TextButton.icon(
                   onPressed: () => context.go(ProfileScreen.path),
                   icon: const Icon(Icons.account_circle_outlined, size: 20),

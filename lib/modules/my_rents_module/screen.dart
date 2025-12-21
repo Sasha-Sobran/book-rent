@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/models/rent.dart';
 import 'package:library_kursach/modules/my_rents_module/cubit.dart';
+import 'package:library_kursach/modules/rents_module/utils/rent_calculations.dart';
 import 'package:library_kursach/utils/date_utils.dart' as app_date;
 import 'package:library_kursach/utils/rent_status_utils.dart';
 import 'package:library_kursach/utils/currency_utils.dart';
@@ -125,13 +126,31 @@ class _Card extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<MyRentsCubit>();
+    final calculation = RentCalculations.calculateRentAmounts(rent);
+    
     return BlocBuilder<MyRentsCubit, MyRentsState>(
       buildWhen: (p, c) => p.actionInProgressId != c.actionInProgressId,
       builder: (context, state) {
         final isBusy = state.actionInProgressId == rent.id;
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: AppDecorations.cardDecoration,
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: calculation.isOverdue ? AppColors.error : AppColors.border,
+              width: calculation.isOverdue ? 2 : 1,
+            ),
+            boxShadow: calculation.isOverdue
+                ? [
+                    BoxShadow(
+                      color: AppColors.error.withValues(alpha: 0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : [],
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -142,13 +161,48 @@ class _Card extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(rent.bookTitle, style: AppTextStyles.h4),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(rent.bookTitle, style: AppTextStyles.h4),
+                            ),
+                            if (calculation.isOverdue)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: AppColors.error.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.warning_amber_rounded, size: 16, color: AppColors.error),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Прострочено',
+                                      style: AppTextStyles.caption.copyWith(
+                                        color: AppColors.error,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ),
                         const SizedBox(height: 4),
                         Text('Статус: ${_statusLabel(rent.status)}', style: AppTextStyles.bodySmall),
-                        Text('Очікувана дата повернення: ${app_date.AppDateUtils.formatDate(rent.expectedReturnDate)}', style: AppTextStyles.bodySmall),
+                        Text(
+                          'Очікувана дата повернення: ${app_date.AppDateUtils.formatDate(rent.expectedReturnDate)}',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: calculation.isOverdue ? AppColors.error : null,
+                            fontWeight: calculation.isOverdue ? FontWeight.w600 : null,
+                          ),
+                        ),
                       ],
                     ),
                   ),
+                  const SizedBox(width: 12),
                   _StatusChip(status: rent.status),
                 ],
               ),

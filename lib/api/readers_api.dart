@@ -53,5 +53,15 @@ class ReadersApi {
   Future<void> deleteReader(int id) async {
     await dio.delete('/readers/$id/');
   }
+
+  Future<List<Reader>> getReadersWithActiveRents({int? libraryId}) async {
+    final params = <String, dynamic>{};
+    if (libraryId != null) params['library_id'] = libraryId;
+    final response = await dio.get(
+      '/readers/with-active-rents/',
+      queryParameters: params.isEmpty ? null : params,
+    );
+    return (response.data as List).map((e) => Reader.fromJson(e)).toList();
+  }
 }
 

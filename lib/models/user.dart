@@ -6,7 +6,6 @@ class User {
   final String role;
   final String? phoneNumber;
 
-  get isAdmin => role == 'admin';
   get isLibrarian => role == 'librarian';
   get isReader => role == 'reader';
   get isRoot => role == 'root';

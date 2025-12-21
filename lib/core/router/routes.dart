@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:library_kursach/modules_admin/home_module/screen.dart';
 import 'package:library_kursach/modules/auth_module/screen.dart';
 import 'package:library_kursach/modules/books_module/screen.dart';
 import 'package:library_kursach/modules/home_module/screen.dart';
@@ -17,12 +16,10 @@ import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
 class AppRoutes {
   final GlobalKey<NavigatorState> rootNavigatorKey;
   final GlobalKey<NavigatorState> homeNavigatorKey;
-  final GlobalKey<NavigatorState> adminNavigatorKey;
 
   AppRoutes(
     this.rootNavigatorKey,
     this.homeNavigatorKey,
-    this.adminNavigatorKey,
   );
 
   late final homeShellRoute = ShellRoute(
@@ -32,18 +29,19 @@ class AppRoutes {
     builder: (context, state, child) => HomeScreen(child: child),
   );
 
-  late final adminShellRoute = ShellRoute(
-    routes: getAdminRoutes(),
-    navigatorKey: adminNavigatorKey,
-    parentNavigatorKey: rootNavigatorKey,
-    builder: (context, state, child) => AdminScreen(child: child),
-  );
-
   late final authRoute = GoRoute(
     path: AuthScreen.path,
     parentNavigatorKey: rootNavigatorKey,
     pageBuilder: (context, state) {
       return MaterialPage(child: const AuthScreen());
+    },
+  );
+
+  late final mainRoute = GoRoute(
+    path: MainScreen.path,
+    parentNavigatorKey: homeNavigatorKey,
+    pageBuilder: (context, state) {
+      return MaterialPage(child: const MainScreen());
     },
   );
 
@@ -75,7 +73,9 @@ class AppRoutes {
     path: RentsScreen.path,
     parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
-      return MaterialPage(child: const RentsScreen());
+      final readerId = state.uri.queryParameters['reader_id'];
+      final readerIdInt = readerId != null ? int.tryParse(readerId) : null;
+      return MaterialPage(child: RentsScreen(readerId: readerIdInt));
     },
   );
 
@@ -87,17 +87,9 @@ class AppRoutes {
     },
   );
 
-  late final mainRoute = GoRoute(
-    path: MainScreen.path,
-    parentNavigatorKey: homeNavigatorKey,
-    pageBuilder: (context, state) {
-      return MaterialPage(child: const MainScreen());
-    },
-  );
-
   late final statisticRoute = GoRoute(
     path: StatisticScreen.path,
-    parentNavigatorKey: adminNavigatorKey,
+    parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
       return MaterialPage(child: const StatisticScreen());
     },
@@ -105,7 +97,7 @@ class AppRoutes {
 
   late final settingsRoute = GoRoute(
     path: SettingsScreen.path,
-    parentNavigatorKey: adminNavigatorKey,
+    parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
       return MaterialPage(child: const SettingsScreen());
     },
@@ -113,7 +105,7 @@ class AppRoutes {
 
   late final eventLogRoute = GoRoute(
     path: EventLogScreen.path,
-    parentNavigatorKey: adminNavigatorKey,
+    parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
       return MaterialPage(child: const EventLogScreen());
     },
@@ -121,24 +113,27 @@ class AppRoutes {
 
   late final manageUsersRoute = GoRoute(
     path: ManageUsersScreen.path,
-    parentNavigatorKey: adminNavigatorKey,
+    parentNavigatorKey: homeNavigatorKey,
     pageBuilder: (context, state) {
       return MaterialPage(child: const ManageUsersScreen());
     },
   );
 
-  List<RouteBase> getHomeRoutes() => [mainRoute, booksRoute, readersRoute, rentsRoute, myRentsRoute, profileRoute];
-
-  List<RouteBase> getRouteTree() => [
-    homeShellRoute,
-    adminShellRoute,
-    authRoute,
-  ];
-
-  List<RouteBase> getAdminRoutes() => [
+  List<RouteBase> getHomeRoutes() => [
+    mainRoute,
+    booksRoute,
+    readersRoute,
+    rentsRoute,
+    myRentsRoute,
+    profileRoute,
     statisticRoute,
     settingsRoute,
     eventLogRoute,
     manageUsersRoute,
+  ];
+
+  List<RouteBase> getRouteTree() => [
+    homeShellRoute,
+    authRoute,
   ];
 }

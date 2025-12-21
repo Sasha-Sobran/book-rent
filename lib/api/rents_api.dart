@@ -30,10 +30,11 @@ class RentsApi {
     return Rent.fromJson(response.data);
   }
 
-  Future<List<Rent>> listRents({String? status, int? readerId}) async {
+  Future<List<Rent>> listRents({String? status, int? readerId, int? libraryId}) async {
     final response = await dio.get('/rents/', queryParameters: {
       if (status != null) 'status': status,
       if (readerId != null) 'reader_id': readerId,
+      if (libraryId != null) 'library_id': libraryId,
     });
     final data = response.data as List<dynamic>;
     return data.map((e) => Rent.fromJson(e as Map<String, dynamic>)).toList();

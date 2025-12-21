@@ -30,6 +30,7 @@ class MainApp extends StatelessWidget {
 
     return MaterialApp.router(
       title: 'Library App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,

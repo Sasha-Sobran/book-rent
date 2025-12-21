@@ -33,7 +33,6 @@ class EventItem extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Іконка
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -47,7 +46,6 @@ class EventItem extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            // Метод та тип сутності
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/core/theme/theme.dart';
+import 'package:library_kursach/core/get_it.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/models/rent.dart';
 import 'package:library_kursach/modules/rents_module/cubit.dart';
 import 'package:library_kursach/modules/rents_module/utils/rent_calculations.dart';
@@ -13,13 +15,18 @@ import 'package:library_kursach/utils/currency_utils.dart';
 
 class RentsScreen extends StatelessWidget {
   static const path = '/rents';
+  final int? readerId;
 
-  const RentsScreen({super.key});
+  const RentsScreen({super.key, this.readerId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => RentsCubit()..init(context),
+      create: (_) {
+        final cubit = RentsCubit();
+        cubit.init(context, readerId: readerId);
+        return cubit;
+      },
       child: Container(
         decoration: AppDecorations.backgroundGradient,
         child: Padding(
@@ -43,6 +50,10 @@ class _RentsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<RentsCubit>();
+    final appCubit = GetItService().instance<AppCubit>();
+    final user = appCubit.state.user;
+    final isRoot = user?.isRoot == true;
+    
     return BlocBuilder<RentsCubit, RentsState>(
       builder: (context, state) {
         return Container(
@@ -60,12 +71,59 @@ class _RentsHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Ренти моєї бібліотеки', style: AppTextStyles.h3),
+                    Text(isRoot ? 'Ренти' : 'Ренти моєї бібліотеки', style: AppTextStyles.h3),
                     Text('${state.rents.length} записів', style: AppTextStyles.bodySmall),
                   ],
                 ),
               ),
               const SizedBox(width: 12),
+              if (isRoot && state.libraries.isNotEmpty) ...[
+                DropdownButton<int?>(
+                  value: state.libraryFilter,
+                  hint: const Text('Бібліотека'),
+                  items: [
+                    const DropdownMenuItem<int?>(
+                      value: null,
+                      child: Text('Усі бібліотеки'),
+                    ),
+                    ...state.libraries.map((lib) {
+                      final label = '${lib.name}${lib.cityName != null ? ' • ${lib.cityName}' : ''}';
+                      return DropdownMenuItem<int?>(
+                        value: lib.id,
+                        child: Text(label),
+                      );
+                    }),
+                  ],
+                  onChanged: (v) => cubit.setLibrary(v),
+                ),
+                const SizedBox(width: 12),
+              ],
+              if (state.readers.isNotEmpty || state.readerFilter != null) ...[
+                Builder(
+                  builder: (context) {
+                    final readerExists = state.readerFilter == null || 
+                        state.readers.any((r) => r.id == state.readerFilter);
+                    return DropdownButton<int?>(
+                      value: readerExists ? state.readerFilter : null,
+                      hint: const Text('Читач'),
+                      items: [
+                        const DropdownMenuItem<int?>(
+                          value: null,
+                          child: Text('Усі читачі'),
+                        ),
+                        ...state.readers.map((reader) {
+                          return DropdownMenuItem<int?>(
+                            value: reader.id,
+                            child: Text(reader.fullName),
+                          );
+                        }),
+                      ],
+                      onChanged: (v) => cubit.setReader(v),
+                    );
+                  },
+                ),
+                const SizedBox(width: 12),
+              ],
               DropdownButton<String?>(
                 value: state.statusFilter,
                 hint: const Text('Статус'),

@@ -3,10 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/core/router/routes.dart';
-import 'package:library_kursach/utils/permission_utils.dart';
 import 'package:library_kursach/modules/auth_module/screen.dart';
 import 'package:library_kursach/modules/books_module/screen.dart';
-import 'package:library_kursach/modules/main_module/screen.dart';
+import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
 
 class AppRouter {
   final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -15,15 +14,11 @@ class AppRouter {
   final GlobalKey<NavigatorState> homeNavigatorKey =
       GlobalKey<NavigatorState>();
 
-  final GlobalKey<NavigatorState> adminNavigatorKey =
-      GlobalKey<NavigatorState>();
-
   AppRouter();
 
   late final appRoutes = AppRoutes(
     rootNavigatorKey,
     homeNavigatorKey,
-    adminNavigatorKey,
   );
 
   late final GoRouter router = GoRouter(
@@ -37,17 +32,10 @@ class AppRouter {
       }
       
       final user = appCubit.state.user;
-      final isAdminOrRoot = PermissionUtils.isAdminOrRoot(user);
+      final isRoot = user?.isRoot == true;
       
-      if (state.matchedLocation == MainScreen.path && isAdminOrRoot) {
-        return BooksScreen.path;
-      }
-      
-      final isAdminRoute = state.matchedLocation.startsWith('/admin');
-      if (isAdminRoute) {
-        if (!isAdminOrRoot) {
-          return BooksScreen.path;
-        }
+      if (state.matchedLocation == '/' && isRoot) {
+        return StatisticScreen.path;
       }
       
       return null;

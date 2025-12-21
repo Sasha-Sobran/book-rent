@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/api/user_api.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
+import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/models/user.dart';
 
 class ProfileState {
@@ -87,6 +89,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         password: password,
       );
       emit(state.copyWith(user: updated, isSaving: false));
+      GetItService().instance<AppCubit>().getSelf();
     } catch (e) {
       emit(state.copyWith(isSaving: false, error: e.toString()));
     }

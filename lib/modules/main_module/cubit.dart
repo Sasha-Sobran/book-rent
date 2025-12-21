@@ -166,4 +166,3 @@ class MainCubit extends Cubit<MainState> {
     }
   }
 }
-

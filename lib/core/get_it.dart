@@ -12,6 +12,7 @@ import 'package:library_kursach/api/penalties_api.dart';
 import 'package:library_kursach/api/settings_api.dart';
 import 'package:library_kursach/api/user_api.dart';
 import 'package:library_kursach/api/notifications_api.dart';
+import 'package:library_kursach/api/statistics_api.dart';
 import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/core/app_env.dart';
 import 'package:library_kursach/core/http_client.dart';
@@ -48,5 +49,6 @@ class GetItService {
     _instance.registerLazySingleton<LibrariesApi>(() => LibrariesApi());
     _instance.registerLazySingleton<CitiesApi>(() => CitiesApi());
     _instance.registerLazySingleton<EventLogApi>(() => EventLogApi());
+    _instance.registerLazySingleton<StatisticsApi>(() => StatisticsApi());
   }
 }

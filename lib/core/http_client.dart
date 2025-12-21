@@ -24,7 +24,6 @@ class HttpClient {
   }
 
   void _initInterceptors(Interceptors interceptors) {
-    // Auth interceptor - adds token and handles refresh
     interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
@@ -65,7 +64,6 @@ class HttpClient {
       ),
     );
 
-    // Logging interceptor
     if (kDebugMode) {
       interceptors.add(
         AppDioLogger(requestBody: true, requestHeader: true, responseBody: true),

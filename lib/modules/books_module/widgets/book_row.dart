@@ -5,11 +5,50 @@ import 'package:library_kursach/utils/image_utils.dart';
 import 'package:library_kursach/models/book.dart';
 import 'package:library_kursach/modules/books_module/cubit.dart';
 import 'package:library_kursach/modules/books_module/widgets/book_detail_dialog.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
+import 'package:library_kursach/api/user_api.dart';
+import 'package:library_kursach/core/get_it.dart';
+import 'package:library_kursach/core/app_env.dart';
+import 'package:library_kursach/utils/currency_utils.dart';
 
-class BookRow extends StatelessWidget {
+class BookRow extends StatefulWidget {
   final Book book;
 
   const BookRow({super.key, required this.book});
+
+  @override
+  State<BookRow> createState() => _BookRowState();
+}
+
+class _BookRowState extends State<BookRow> {
+  int? _discountPercentage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadDiscount();
+    });
+  }
+
+  Future<void> _loadDiscount() async {
+    if (!mounted) return;
+    
+    final appCubit = GetItService().instance<AppCubit>();
+    final appState = appCubit.state;
+    if (appState.user?.isReader != true) return;
+
+    try {
+      final readerInfo = await UserApi().getReaderInfo();
+      final discount = readerInfo['discount_percentage'] as int?;
+      if (mounted) {
+        setState(() {
+          _discountPercentage = discount;
+        });
+      }
+    } catch (e) {
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +59,7 @@ class BookRow extends StatelessWidget {
           builder:
               (_) => BlocProvider.value(
                 value: context.read<BooksCubit>(),
-                child: BookDetailDialog(book: book),
+                child: BookDetailDialog(book: widget.book),
               ),
         );
       },
@@ -48,17 +87,17 @@ class BookRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    book.title,
+                    widget.book.title,
                     style: AppTextStyles.bodySmall.copyWith(
                       fontWeight: FontWeight.w700,
                       fontSize: 13,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    book.author,
+                    widget.book.author,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.textSecondary,
                       fontSize: 11,
@@ -67,31 +106,9 @@ class BookRow extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      _buildAvailability(),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                        child: Text(
-                          '${book.price.toStringAsFixed(0)} ₴',
-                          style: AppTextStyles.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  _buildAvailability(),
+                  const SizedBox(height: 8),
+                  _buildPriceAndRent(),
                 ],
               ),
             ),
@@ -101,8 +118,121 @@ class BookRow extends StatelessWidget {
     );
   }
 
+  Widget _buildPriceAndRent() {
+    final dailyRatePercent = GetItService().instance<AppEnv>().rentDailyRatePercent;
+    final dailyRateBase = widget.book.price * dailyRatePercent;
+    final hasDiscount = _discountPercentage != null && _discountPercentage! > 0;
+    final dailyRate = hasDiscount
+        ? dailyRateBase * (1 - _discountPercentage! / 100)
+        : dailyRateBase;
+    final deposit = widget.book.price.round();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: AppColors.warning.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.security, size: 14, color: AppColors.warning),
+              const SizedBox(width: 6),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Застава',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 8,
+                    ),
+                  ),
+                  Text(
+                    '$deposit ₴',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.warning,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+          decoration: BoxDecoration(
+            color: AppColors.secondary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.schedule, size: 14, color: AppColors.secondary),
+              const SizedBox(width: 6),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Оренда',
+                    style: AppTextStyles.caption.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 8,
+                    ),
+                  ),
+                  if (hasDiscount)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${CurrencyUtils.formatCurrency(dailyRateBase)}',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 8,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${CurrencyUtils.formatCurrency(dailyRate)}',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.success,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    )
+                  else
+                    Text(
+                      CurrencyUtils.formatCurrency(dailyRate),
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.secondary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 11,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildAvailability() {
-    if (book.quantity == 0) {
+    if (widget.book.quantity == 0) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
         decoration: BoxDecoration(
@@ -126,7 +256,7 @@ class BookRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        'К-сть: ${book.quantity}',
+        'К-сть: ${widget.book.quantity}',
         style: AppTextStyles.caption.copyWith(
           color: AppColors.textSecondary,
           fontWeight: FontWeight.w600,
@@ -137,7 +267,7 @@ class BookRow extends StatelessWidget {
   }
 
   Widget _buildBookImage() {
-    final imageUrl = ImageUtils.buildImageUrl(book.imageUrl);
+    final imageUrl = ImageUtils.buildImageUrl(widget.book.imageUrl);
 
     return Container(
       height: 140,

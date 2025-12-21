@@ -197,7 +197,7 @@ class BooksScreen extends StatelessWidget {
                                         crossAxisCount: cross,
                                         crossAxisSpacing: 12,
                                         mainAxisSpacing: 12,
-                                        childAspectRatio: .85,
+                                        childAspectRatio: .82,
                                       ),
                                       itemCount: state.books.length,
                                       itemBuilder: (context, index) => BookRow(book: state.books[index]),

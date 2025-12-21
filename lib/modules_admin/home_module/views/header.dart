@@ -31,13 +31,13 @@ class AdminHeader extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: const Icon(
-                      Icons.admin_panel_settings_outlined,
+                      Icons.security_outlined,
                       color: AppColors.primary,
                       size: 22,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text('Admin', style: AppTextStyles.h4),
+                  Text('Адміністратор', style: AppTextStyles.h4),
                   const Spacer(),
                   TextButton.icon(
                     onPressed: () => context.go(BooksScreen.path),

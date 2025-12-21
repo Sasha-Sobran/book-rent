@@ -69,7 +69,6 @@ class EventsList extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   if (index == state.events.length) {
-                    // Load more button
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),

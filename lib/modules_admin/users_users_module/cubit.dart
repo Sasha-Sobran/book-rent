@@ -25,8 +25,6 @@ class UsersUsersCubit extends Cubit<UsersUsersState> {
   List<String> get _assignableRoleNames {
     switch (_currentUserRole) {
       case 'root':
-        return ['admin', 'librarian'];
-      case 'admin':
         return ['librarian'];
       default:
         return [];
@@ -48,7 +46,8 @@ class UsersUsersCubit extends Cubit<UsersUsersState> {
 
   Future<void> getRoles() async {
     final roles = await adminApi.getRoles();
-    emit(state.copyWith(roles: roles));
+    final filteredRoles = roles.where((r) => r.name.toLowerCase() != 'root' && r.name.toLowerCase() != 'admin').toList();
+    emit(state.copyWith(roles: filteredRoles));
   }
 
   Future<void> getUsers() async {

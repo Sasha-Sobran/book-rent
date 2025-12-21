@@ -141,7 +141,6 @@ class EventLogCubit extends Cubit<EventLogState> {
   void _handleDioError(DioError e) {
     final detail = e.response?.data?['detail'];
     final message = detail ?? 'Щось пішло не так';
-    // Можна додати snackbar, але тут немає контексту
     print('EventLog error: $message');
   }
 }

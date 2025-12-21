@@ -43,7 +43,6 @@ class WebSocketClient {
               _messageController.add(data);
             }
           } catch (e) {
-            // Ignore invalid messages
           }
         },
         onError: (error) {

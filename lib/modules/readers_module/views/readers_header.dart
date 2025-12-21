@@ -3,6 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:library_kursach/core/theme/theme.dart';
 import 'package:library_kursach/modules/readers_module/cubit.dart';
 import 'package:library_kursach/modules/readers_module/widgets/reader_form_dialog.dart';
+import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
+import 'package:library_kursach/core/get_it.dart';
+import 'package:library_kursach/utils/permission_utils.dart';
 
 class ReadersHeader extends StatelessWidget {
   const ReadersHeader({super.key});
@@ -10,6 +13,9 @@ class ReadersHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ReadersCubit>();
+    final appCubit = GetItService().instance<AppCubit>();
+    final isRoot = PermissionUtils.isRoot(appCubit.state.user);
+    final isReadOnly = isRoot;
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -49,6 +55,7 @@ class ReadersHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
+          if (!isReadOnly)
           ElevatedButton.icon(
             onPressed: () => showDialog(
               context: context,

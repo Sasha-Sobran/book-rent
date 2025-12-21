@@ -12,6 +12,7 @@ class AppColors {
   static const success = Color(0xFF22C55E);
   static const error = Color(0xFFEF4444);
   static const warning = Color(0xFFF59E0B);
+  static const info = Color(0xFF3B82F6);
   
   static const background = Color(0xFFF8FAFC);
   static const surface = Colors.white;
@@ -29,8 +30,6 @@ class AppColors {
   
   static Color roleColor(String role) {
     switch (role.toLowerCase()) {
-      case 'admin':
-        return Colors.purple;
       case 'root':
         return Colors.orange;
       case 'librarian':

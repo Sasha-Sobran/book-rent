@@ -11,7 +11,6 @@ class RoleItem extends StatelessWidget {
 
   IconData _getRoleIcon() {
     switch (role.name.toLowerCase()) {
-      case 'admin': return Icons.admin_panel_settings;
       case 'root': return Icons.security;
       case 'librarian': return Icons.library_books;
       case 'reader': return Icons.person;

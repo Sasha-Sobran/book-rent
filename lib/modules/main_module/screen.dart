@@ -395,7 +395,7 @@ class _PopularBooksList extends StatelessWidget {
           itemBuilder: (context, index) {
             final book = books[index];
             return SizedBox(
-              width: 190,
+              width: 220,
               child: BookRow(book: book),
             );
           },

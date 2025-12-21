@@ -63,6 +63,7 @@ class RentStatusUtils {
       const DropdownMenuItem(value: RentStatusNames.active, child: Text('Активні')),
       const DropdownMenuItem(value: RentStatusNames.returned, child: Text('Повернені')),
       const DropdownMenuItem(value: RentStatusNames.declined, child: Text('Відхилені')),
+      const DropdownMenuItem(value: RentStatusNames.cancelled, child: Text('Скасовані')),
     ]);
     return items;
   }

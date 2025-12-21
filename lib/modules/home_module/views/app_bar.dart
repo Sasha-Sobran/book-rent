@@ -4,12 +4,16 @@ import 'package:library_kursach/common_cubit/app_cubit/cubit.dart';
 import 'package:library_kursach/common_cubit/app_cubit/state.dart';
 import 'package:library_kursach/core/get_it.dart';
 import 'package:library_kursach/core/theme/theme.dart';
-import 'package:library_kursach/modules/books_module/screen.dart';
 import 'package:library_kursach/modules/main_module/screen.dart';
+import 'package:library_kursach/modules/books_module/screen.dart';
 import 'package:library_kursach/modules/profile_module/screen.dart';
 import 'package:library_kursach/modules/readers_module/screen.dart';
 import 'package:library_kursach/modules/rents_module/screen.dart';
 import 'package:library_kursach/modules/my_rents_module/screen.dart';
+import 'package:library_kursach/modules_admin/statistic_module/screen.dart';
+import 'package:library_kursach/modules_admin/settings_module/screen.dart';
+import 'package:library_kursach/modules_admin/event_log_module/screen.dart';
+import 'package:library_kursach/modules_admin/users_users_module/screen.dart';
 import 'package:library_kursach/utils/permission_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,24 +24,32 @@ class HomeAppBar extends StatelessWidget {
     final user = state.user;
     final canSeeReaders = PermissionUtils.canSeeReaders(user);
     final isLibrarian = user?.isLibrarian == true;
-    final isRegular = user != null && !isLibrarian && user.isAdmin != true && user.isRoot != true;
-    final isAdminOrRoot = PermissionUtils.isAdminOrRoot(user);
-
+    final isRegular = user != null && !isLibrarian && user.isRoot != true;
+    final isRoot = PermissionUtils.isRoot(user);
+    
     final tabs = <_HomeTab>[];
     
-    if (!isAdminOrRoot) {
-      tabs.add(_HomeTab(path: MainScreen.path, label: 'Головна', icon: Icons.home_outlined));
-    }
-    
-    tabs.add(_HomeTab(path: BooksScreen.path, label: 'Книги', icon: Icons.menu_book_outlined));
-    if (isLibrarian) {
-      tabs.add(_HomeTab(path: RentsScreen.path, label: 'Ренти', icon: Icons.assignment_outlined));
-    } else if (isRegular) {
-      tabs.add(_HomeTab(path: MyRentsScreen.path, label: 'Мої ренти', icon: Icons.assignment_ind_outlined));
-    }
-    tabs.add(_HomeTab(path: ProfileScreen.path, label: 'Профіль', icon: Icons.person_pin_circle_outlined));
-    if (canSeeReaders) {
-      tabs.add(_HomeTab(path: ReadersModuleScreen.path, label: 'Читачі', icon: Icons.person_outline));
+    if (isRoot) {
+      tabs.add(_HomeTab(path: StatisticScreen.path, label: 'Статистика', icon: Icons.analytics_outlined));
+      tabs.add(_HomeTab(path: ManageUsersScreen.path, label: 'Користувачі', icon: Icons.people_outline));
+      tabs.add(_HomeTab(path: EventLogScreen.path, label: 'Журнал подій', icon: Icons.history));
+      tabs.add(_HomeTab(path: SettingsScreen.path, label: 'Налаштування', icon: Icons.settings_outlined));
+      tabs.add(_HomeTab(path: ProfileScreen.path, label: 'Профіль', icon: Icons.person_pin_circle_outlined));
+    } else {
+      if (isRegular) {
+        tabs.add(_HomeTab(path: MainScreen.path, label: 'Головна', icon: Icons.home_outlined));
+      }
+      tabs.add(_HomeTab(path: BooksScreen.path, label: 'Книги', icon: Icons.menu_book_outlined));
+      final canManageRents = PermissionUtils.canManageRents(user);
+      if (canManageRents) {
+        tabs.add(_HomeTab(path: RentsScreen.path, label: 'Ренти', icon: Icons.assignment_outlined));
+      } else if (isRegular) {
+        tabs.add(_HomeTab(path: MyRentsScreen.path, label: 'Мої ренти', icon: Icons.assignment_ind_outlined));
+      }
+      tabs.add(_HomeTab(path: ProfileScreen.path, label: 'Профіль', icon: Icons.person_pin_circle_outlined));
+      if (canSeeReaders) {
+        tabs.add(_HomeTab(path: ReadersModuleScreen.path, label: 'Читачі', icon: Icons.person_outline));
+      }
     }
     return tabs;
   }

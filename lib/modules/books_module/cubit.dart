@@ -210,7 +210,6 @@ class BooksCubit extends Cubit<BookState> {
         newCategories: newCategories,
         newGenres: newGenres,
       );
-      // refresh filters if new taxonomies were added
       final updatedTaxonomies = await _reloadTaxonomies();
       emit(
         state.copyWith(
